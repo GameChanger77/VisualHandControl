@@ -32,13 +32,20 @@ while True:
     if len(lmList) != 0:
         fingers = detector.fingersUp()
 
-        if fingers[1] == 1:
+        if fingers[1] == 1:  # First/pointer finger extended
             if fingers[2] == 1 and fingers[4] == 0:  # Clicking mode
                 mouse.click_mode(img)
             elif fingers[2] == 0 and fingers[4] == 0:  # Moving mode
                 mouse.movement_mode(img, lmList)
             elif fingers[0] == 1 and fingers[4] == 1:  # Volume mode
                 volControl.getVolumeControl(img, lmList, minLen=25, maxLen=300)
+
+            if fingers[3] == 1:  # Ring finger extended
+
+                if fingers[0] == 1:  # Scroll Up
+                    autopy.key.tap(autopy.key.Code.UP_ARROW)
+                elif fingers[0] == 0:  # Scroll Down
+                    autopy.key.tap(autopy.key.Code.DOWN_ARROW)
 
     cTime = time.time()
     fps = 1 / (cTime - pTime)
