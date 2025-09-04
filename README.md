@@ -13,6 +13,9 @@ Currenty the user can:
 
 More functionallity like scrolling and on-screen keyboard activation will be added eventually.
 
+Uses python 3.8
+
+pip install -r requirements.txt
 
 Disclamer:
 There is no guarante that this will actually work with your system. You will also need a decent quality webcam to detect your hands.

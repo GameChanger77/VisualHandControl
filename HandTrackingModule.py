@@ -2,18 +2,20 @@ import math
 
 import cv2
 import mediapipe as mp
+import numpy as np
 import time
 
 
-class handDetector():
-    def __init__(self, mode=False, maxHands=2, detectorCon=0.5, trackingCon=0.5):
+class handDetector:
+    def __init__(self, mode=False, maxHands=2, complexity=1, detectorCon=0.5, trackingCon=0.5):
         self.mode = mode
         self.maxHands = maxHands
+        self.complexity = complexity
         self.detectorCon = detectorCon
         self.trackingCon = trackingCon
 
         self.mpHands = mp.solutions.hands
-        self.hands = self.mpHands.Hands(self.mode, self.maxHands, self.detectorCon, self.trackingCon)
+        self.hands = self.mpHands.Hands(self.mode, self.maxHands, self.complexity, self.detectorCon, self.trackingCon)
         self.mpDraw = mp.solutions.drawing_utils
 
         self.tipIds = [4, 8, 12, 16, 20]
@@ -26,8 +28,26 @@ class handDetector():
             for handLms in self.results.multi_hand_landmarks:
                 if draw:
                     self.mpDraw.draw_landmarks(img, handLms, self.mpHands.HAND_CONNECTIONS)
-
         return img
+
+    def getHandDistanceAway(self, lmList):
+        def calculate_distance(x1, y1, x2, y2):
+            distance = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+            return distance
+
+        # Data points for a polynomial regression
+        x = [300, 245, 200, 170, 145, 130, 112, 103, 93, 87, 80, 75, 70, 67, 62, 59, 57]
+        y = [20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100]
+        coff = np.polyfit(x, y, 2)  # y = Ax^2 + Bx + C
+
+        if lmList != 0:
+            x, y = lmList[5][1], lmList[5][2]
+            x2, y2 = lmList[17][1], lmList[17][2]
+            dis = calculate_distance(x, y, x2, y2)
+
+            A, B, C = coff
+            distanceCM = int(A * dis ** 2 + B * dis + C)
+            return distanceCM
 
     def findPosition(self, img, handNo=0, draw=True):
         xList = []
@@ -49,7 +69,9 @@ class handDetector():
 
             xmin, xmax = min(xList), max(xList)
             ymin, ymax = min(yList), max(yList)
+            # boxW, boxH = xmax - xmin, ymax - ymin
             bbox = xmin, ymin, xmax, ymax
+            # cx, cy = bbox[0] + (bbox[2] // 2), bbox[1] + (bbox[3] // 2)
 
             if draw:
                 cv2.rectangle(img, (xmin - 20, ymin - 20), (xmax + 20, ymax + 20), (0, 255, 0), 2)
