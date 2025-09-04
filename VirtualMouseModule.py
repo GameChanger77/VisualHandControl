@@ -22,7 +22,7 @@ class VirtualMouse:  # This module doesn't work for some reason
         self.clickToggle = True  # Keeps the program from clicking extremely fast
 
     def click_mode(self, img, draw=True):
-        length, img, lineInfo = self.detector.findDistance(8, 12, img)
+        length, img, lineInfo = self.detector.findDistance(4, 8, img)
 
         if length <= 50 and self.clickToggle:
             if draw:

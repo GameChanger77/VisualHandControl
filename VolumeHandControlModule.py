@@ -8,7 +8,7 @@ from comtypes import CLSCTX_ALL
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 
 
-class VolumeHandControl():
+class VolumeHandControl:
     def __init__(self, detector=htm.handDetector(detectorCon=0.75)):
         self.devices = AudioUtilities.GetSpeakers()
         self.interface = self.devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
@@ -24,7 +24,10 @@ class VolumeHandControl():
         x2, y2 = lmList[8][1], lmList[8][2]
         cx, cy = (x1 + x2) // 2, (y1 + y2) // 2
 
-        length = math.hypot(x2 - x1, y2 - y1)
+        dist = self.detector.getHandDistanceAway(lmList)
+        print("DIST: ", dist)
+
+        length = math.hypot(x2 - x1, y2 - y1) * (dist / 40.0)
         length = np.interp(length, [minLen, maxLen], [0, 100])
 
         db = math.log10(1 + length)
